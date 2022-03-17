@@ -124,3 +124,5 @@ any changes you make back, and benefit the community.
 Chaparro, G., Mejía, A. Phasepy: A Python based framework for fluid phase
 equilibria and interfacial properties computation. J Comput Chem. 2020, 41, 29,
 2504-2526. `https://doi.org/10.1002/jcc.26405 <https://doi.org/10.1002/jcc.26405>`_.
+
+Fernandez, P. Edition
