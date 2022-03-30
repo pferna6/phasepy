@@ -64,3 +64,19 @@ def alphaDS(a,b):
     print(alphasum)
     
 alphaDS(2,2)
+
+#%% Summation for DS 
+ 
+al = np.array([[2/3,1/3,0,0,0,0],
+            [1/2,1/2,0,0,0,0]])
+Akl = 
+Bkl = 
+def DS(e):
+    nums = e+1
+    DSsum = 0
+    for k in range(0,nums):
+        for l in range(0,nums):
+            DSsum += (al[0][k]-al[1][k])(al[0][l]-al[1][l])
+    print(DSsum)
+    
+# alphaDS(2,2)
