@@ -22,7 +22,7 @@ import numpy as np
 from phasepy import component, mixture, preos
 from phasepy.equilibrium import tpd_min, tpd_minimas, flash, bubblePy#, #dewPy
 from PREOS_classes_PL import Jaubertkij
-from collections import Counter #counter helps keep a count of all the items which are inserted into the collection with the keys 
+from collections import Counter
 
 
 #%%
@@ -49,30 +49,22 @@ if __name__ == '__main__':
     butane = component(name='Butane',Tc=425.2, Pc = 37.997, Vc=255., Zc = 0.274,Mw=58., #Vc and Zc come from engineering toolbox, not a proper reference
                        Ant = [10.02951,2706.875,-2.071],# NIST webbook Das, Reed, 1973
                        w = 0.193,GC={'CH3':2, 'CH2': 2})
-    ethane = component(name='ethane',Tc=305.4, Pc=48.84, Vc=148.0, Zc=0.285, w=0.098 
-                       ,GC={'CH3':2})
-    nheptane = component(name='nheptane',Tc=540.2, Pc=27.36, Vc=304.0, Zc=0.263, w=0.351 
-                       ,GC={'CH3':2,'CH2':5})
     
-    # mix=mixture(npropylbenzene,undecane)
-    # # mix.add_component(propane)
-    # mix.add_component(nitrogen)
-    # # mix.add_component(butane)
+    mix=mixture(npropylbenzene,undecane)
+    # mix.add_component(propane)
+    mix.add_component(nitrogen)
+    # mix.add_component(butane)
 
-    # # mix = Jaubertkij(mix,330)
+#%%
+    mix = Jaubertkij(mix,330)
     
-    # #Calculate binary interaction parameters from unifac.  We could redo this for Jaubert
-    # # mix.unifac()
+    #Calculate binary interaction parameters from unifac.  We could redo this for Jaubert
+    # mix.unifac()
     
-    # #also kij is formally temperature dependent in PREOS
+    #also kij is formally temperature dependent in PREOS
     
-    # eos = preos(mix,'qmr') # Peng Robinson EOS using quadratic mixing rule
-#%%nheptane-ethane mixture critical loci 
-if __name__ == '__main__':
-   
-    mix = nitrogen + npropylbenzene
+    eos = preos(mix,'qmr') # Peng Robinson EOS using quadratic mixing rule
     
-    # mix = nitrogen + undecane
 
 #%%
 
@@ -100,46 +92,44 @@ if __name__ == '__main__':
     
 #%%
 ####### script #######
-if __name__ == '__main__':  #entry point where program begins execution?If this file is the main file?
+if __name__ == '__main__':
 
-    # T=623.05
-    # Pguess=72.15
-    # z=np.array([0.33333,0.33333,0.33333]) #global composition    
+    T=623.05
+    Pguess=72.15
+    z=np.array([0.33333,0.33333,0.33333]) #global composition    
     
-    z=np.array([.9,0.1]) #global composition
-#629.1
+#     z=np.array([0.4,0.4,0.2]) #global composition
+# #629.1
+#     T=629.1
+#     Pguess=48.1
 
-
-    T=200
-    Pguess=215
 
     mix = Jaubertkij(mix,T)    
     eos = preos(mix,'qmr') # Peng Robinson EOS using quadratic mixing rule
-    
-    nmin = 10; #number of minimus 
-    y0_guesses, tpd_values = tpd_minimas(nmin,z,T,Pguess,eos,'L','V')
+    y0_guesses, tpd_values = tpd_minimas(10,z,T,Pguess,eos,'L','V') #guesses are self explanatory
     # jj = np.unique(np.array(y0_guesses),axis=0)
-    x0_guesses, tpd_values2 = tpd_minimas(nmin,z,T,Pguess,eos,'V','L')
+    x0_guesses, tpd_values2 = tpd_minimas(10,z,T,Pguess,eos,'V','L')
+    
+    #%%
     # ii = np.unique(np.array(x0_guesses),axis=0)
+    
     # for i in range(ii.shape[0]):
     #     for j in range(jj.shape[0]):
     #         x0_guess = ii[i,:]
     #         y0_guess = jj[j,:]
+    
     y0_guess = y0_guesses[np.argmax(tpd_values)]
     x0_guess = x0_guesses[np.argmin(tpd_values2)]
+    #         # print(np.unique(x0_guesses),np.unique( tpd_values2))
+    #         # x0_guess, tpd_value2 = tpd_min(W=w0,Z=z,T=T,P=Pguess,model=eos,stateW='L',stateZ='L')
+    #         # print(x0_guess)
     x_result,y_result,fraction = flash(x_guess=x0_guess, y_guess = y0_guess, equilibrium='LV', Z=z,T=T, P=Pguess, model =eos)
-    print(x_result-y_result)
-    print(x_result,y_result)
-print(mix.kij[0][1])
-    #%%
-    # y0_guess = y0_guesses[np.argmax(tpd_values)]
-    # x0_guess = x0_guesses[np.argmin(tpd_values2)]
-    # #         # print(np.unique(x0_guesses),np.unique( tpd_values2))
-    # #         # x0_guess, tpd_value2 = tpd_min(W=w0,Z=z,T=T,P=Pguess,model=eos,stateW='L',stateZ='L')
-    # #         # print(x0_guess)
-    # x_result,y_result,fraction = flash(x_guess=x0_guess, y_guess = y0_guess, equilibrium='LV', Z=z,T=T, P=Pguess, model =eos)
-    # print(x_result-y_result)
-    # print(x_result,y_result,fraction)
+    print(x_result-y_result) #This is the criteria for equilibra. For equilibra, the x and y component of a secific component must be approxietly equal. Cut off is .02? 
+    print('The liquid phase mole fractions are', x_result)
+    print('The vapor phase mole fractions are', y_result)
+    print(fraction)
+#%%
+
     # z_propane = np.linspace(0.2,.8,7)
     # x_result = np.zeros((7,2),)
     # y_result = np.zeros((7,2),)
@@ -149,6 +139,7 @@ print(mix.kij[0][1])
     #     z= np.array([z_propane[i],1-z_propane[i]]) #global composition
     #     print(z)
     #     # for j in range(len
+
     #     # w0 = np.array([0.36, 0.63]) #initial value to try to find phase stability for , doesn't really matter, but you can try multiple 
     #     # y0_guess, tpd_value = tpd_min(W=w0,Z=z,T=T,P=Pguess, model=eos, stateW='V',stateZ='L')
     #     y0_guesses, tpd_values = tpd_minimas(5,z,T,Pguess,eos,'L','V')
@@ -161,76 +152,5 @@ print(mix.kij[0][1])
     #     # x0_guesses, tpd_values = tpd_minimas(10, z, T, Pguess, eos, 'V', 'L')
     #     x_result[i,:],y_result[i,:],fraction[i] = flash(x_guess=x0_guess, y_guess = y0_guess, equilibrium='LV', Z=z,T=T, P=Pguess, model =eos)
     #     y_result[i,:], P_result[i] = bubblePy(y0_guess,Pguess,z,T,eos)
+
         
-#%%
-# if __name__ == '__main__':
-
-#     # T=623.05
-#     # Pguess=72.15
-#     # z=np.array([0.33333,0.33333,0.33333]) #global composition    
-    
-#     z=np.array([0.4,0.4,0.2]) #global composition
-# #629.1
-#     T=629.1
-#     Pguess=48.1
-
-#     mix = Jaubertkij(mix,T)    
-#     eos = preos(mix,'qmr') # Peng Robinson EOS using quadratic mixing rule
-    
-
-
-
-
-#     y0_guesses, tpd_values = tpd_minimas(10,z,T,Pguess,eos,'L','V') #guesses are self explanatory
-    
-#     # jj = np.unique(np.array(y0_guesses),axis=0)
-    
-#     x0_guesses, tpd_values2 = tpd_minimas(10,z,T,Pguess,eos,'V','L')
-    
-    #%%
-    # ii = np.unique(np.array(x0_guesses),axis=0)
-    
-    # for i in range(ii.shape[0]):
-    #     for j in range(jj.shape[0]):
-    #         x0_guess = ii[i,:]
-    #         y0_guess = jj[j,:]
-    
-# y0_guess = y0_guesses[np.argmax(tpd_values)]
-# x0_guess = x0_guesses[np.argmin(tpd_values2)]
-#     #         # print(np.unique(x0_guesses),np.unique( tpd_values2))
-#     #         # x0_guess, tpd_value2 = tpd_min(W=w0,Z=z,T=T,P=Pguess,model=eos,stateW='L',stateZ='L')
-#     #         # print(x0_guess)
-# x_result,y_result,fraction = flash(x_guess=x0_guess, y_guess = y0_guess, equilibrium='LV', Z=z,T=T, P=Pguess, model =eos)
-# print(x_result-y_result)
-# print(x_result,y_result)
-
-#%%
-from math import log
-
-#%%
-Temp = []
-Pres = []
-Prod = []
-Ycomp = []
-Xcomp = []
-for i in range(0,200,10):
-    for j in range(0,10,1):
-        try:
-            # if i not in Temp:
-            #     if j not in Pres:
-            if log(i*j) <20:
-                Temp.append(i)
-                Pres.append(j)
-                Prod.append(i*j)
-        except:
-            pass
-PotSol = list(zip(Temp,Pres,Prod))
-
-# print(Temp)
-# print(Pres)
-#         if i*j < 100:
-#             Temp.append(i)
-#             Pres.append(j)
-
-# print(Temp)
-# print(Pres)
